@@ -115,6 +115,15 @@ const FONTS = `
 }
 `;
 
+function apiErrorMessage(data) {
+  if (!data || !data.error) return null;
+  const msg = typeof data.error === 'string' ? data.error : data.error.message;
+  if (msg && msg.includes('ANTHROPIC_API_KEY')) {
+    return "This AI feature isn't set up yet — the site owner needs to add an API key.";
+  }
+  return msg || 'The AI service returned an error.';
+}
+
 export default function CareerMode() {
   const [tab, setTab] = useState('bank');
   const [stories, setStories] = useState([]);
@@ -559,6 +568,8 @@ Return ONLY a JSON object, no markdown fences, no commentary, in this exact shap
         }),
       });
       const data = await response.json();
+      const apiErr = apiErrorMessage(data);
+      if (apiErr) { setError(apiErr); return; }
       const text = (data.content || []).map((b) => b.text || '').join('\n');
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
@@ -1182,6 +1193,8 @@ Sort matches by score descending. Omit stories that don't clear the 35 threshold
         }),
       });
       const data = await response.json();
+      const apiErr = apiErrorMessage(data);
+      if (apiErr) { setError(apiErr); return; }
       const text = (data.content || []).map((b) => b.text || '').join('\n');
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
@@ -1364,6 +1377,8 @@ Return ONLY a JSON object, no markdown fences, no commentary, in this exact shap
         }),
       });
       const data = await response.json();
+      const apiErr = apiErrorMessage(data);
+      if (apiErr) { setError(apiErr); return; }
       const text = (data.content || []).map((b) => b.text || '').join('\n');
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
@@ -1413,6 +1428,8 @@ Return ONLY a JSON object, no markdown fences, no commentary:
         }),
       });
       const data = await response.json();
+      const apiErr = apiErrorMessage(data);
+      if (apiErr) { setFeedbackError(apiErr); return; }
       const text = (data.content || []).map((b) => b.text || '').join('\n');
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
