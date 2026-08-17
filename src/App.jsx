@@ -101,6 +101,18 @@ function uid() {
 
 const FONTS = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@media print {
+  @page { margin: 0.5in; }
+  body:not(.printing-resume) { display: none; }
+  body.printing-resume * { visibility: hidden; }
+  body.printing-resume #resume-print-target,
+  body.printing-resume #resume-print-target * { visibility: visible; }
+  body.printing-resume #resume-print-target {
+    position: absolute; left: 0; top: 0; width: 100%;
+    box-shadow: none !important; border-radius: 0 !important;
+  }
+}
 `;
 
 export default function CareerMode() {
@@ -804,6 +816,15 @@ function ResumeTemplates({ stories, goToBank }) {
     URL.revokeObjectURL(url);
   }
 
+  function downloadPDF() {
+    document.body.classList.add('printing-resume');
+    window.onafterprint = () => {
+      document.body.classList.remove('printing-resume');
+      window.onafterprint = null;
+    };
+    window.print();
+  }
+
   if (!loaded) return null;
 
   if (stories.length === 0) {
@@ -921,7 +942,10 @@ function ResumeTemplates({ stories, goToBank }) {
               <button onClick={copyText} style={secondaryBtn}>
                 {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy text'}
               </button>
-              <button onClick={downloadText} style={primaryBtn}>
+              <button onClick={downloadPDF} style={primaryBtn}>
+                <Download size={14} /> Download PDF
+              </button>
+              <button onClick={downloadText} style={secondaryBtn}>
                 <Download size={14} /> Download .txt
               </button>
             </div>
@@ -1058,7 +1082,7 @@ function ExampleSection({ label, children }) {
 
 function ResumePreview({ profile, template, assignment, stories, skillsText }) {
   return (
-    <div style={{
+    <div id="resume-print-target" style={{
       background: '#F5F1E6', color: '#22201A', borderRadius: '4px',
       padding: '28px 30px', boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
       position: 'sticky', top: '16px', minHeight: '400px',
