@@ -179,6 +179,8 @@ export default function CareerMode() {
         <CoverLetterTemplate stories={stories} goToBank={() => setTab('bank')} />
       ) : tab === 'interview' ? (
         <InterviewPrep stories={stories} />
+      ) : tab === 'plus' ? (
+        <CareerModePlus />
       ) : (
         <ResumeBuilder stories={stories} />
       )}
@@ -232,11 +234,17 @@ function Header({ tab, setTab, storyCount }) {
         <TabButton active={tab === 'interview'} onClick={() => setTab('interview')} icon={<MessageCircle size={14} />} aiPowered>
           Interview Prep
         </TabButton>
+        <TabButton active={tab === 'plus'} onClick={() => setTab('plus')} icon={<Star size={14} fill={tab === 'plus' ? '#5B7FA6' : 'none'} color="#5B7FA6" />}>
+          Plus
+        </TabButton>
       </div>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
-        color: '#5A6272', marginTop: '10px', paddingBottom: '10px',
-      }}>
+      <div
+        onClick={() => setTab('plus')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
+          color: '#5A6272', marginTop: '10px', paddingBottom: '10px', cursor: 'pointer', width: 'fit-content',
+        }}
+      >
         <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> CareerMode Plus
       </div>
     </div>
@@ -1855,6 +1863,92 @@ function FeedbackRow({ label, color, text }) {
         {label}
       </div>
       <div style={{ fontSize: '12.5px', lineHeight: 1.5 }}>{text}</div>
+    </div>
+  );
+}
+
+/* ---------------- CareerMode Plus ---------------- */
+
+const PLUS_FEATURES = [
+  { title: 'Import Resume', desc: "Paste an existing resume and AI extracts it into ready-to-use Story Bank entries — no retyping everything by hand." },
+  { title: 'Resume Builder', desc: 'Paste a job posting and get resume bullets tailored to that specific role, pulled straight from your Story Bank.' },
+  { title: 'Interview Prep', desc: 'AI-generated interview questions for a posting, plus feedback on your practice answers before the real thing.' },
+];
+
+const FREE_FEATURES = [
+  'Unlimited Story Bank entries',
+  'Resume Templates (3 structures)',
+  'Cover Letter template',
+  'PDF and .txt export',
+];
+
+function CareerModePlus() {
+  return (
+    <div style={{ padding: '24px 28px 40px' }}>
+      <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '20px', marginBottom: '6px' }}>
+        CareerMode Plus
+      </div>
+      <div style={{ fontSize: '13px', color: '#8B93A0', marginBottom: '24px', maxWidth: '560px', lineHeight: 1.5 }}>
+        Everything you need to build a resume and cover letter from your own material is free.
+        Plus unlocks the AI tools that tailor that material to a specific job and help you
+        practice for the interview.
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', maxWidth: '760px' }}>
+        <div style={{ background: '#1B212C', border: '1px solid #262E3B', borderRadius: '12px', padding: '20px' }}>
+          <div style={{ fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace", color: '#8B93A0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Free
+          </div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '24px', margin: '6px 0 16px' }}>
+            $0
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {FREE_FEATURES.map((f) => (
+              <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '13px', lineHeight: 1.4 }}>
+                <Check size={14} style={{ color: '#4C8577', marginTop: '2px', flexShrink: 0 }} />
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: '18px', fontSize: '12px', color: '#5A6272' }}>
+            This is what you're using right now.
+          </div>
+        </div>
+
+        <div style={{ background: '#1B212C', border: '1px solid #5B7FA6', borderRadius: '12px', padding: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace", color: '#5B7FA6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <Star size={11} fill="#5B7FA6" color="#5B7FA6" /> CareerMode Plus
+          </div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '24px', margin: '6px 0 4px' }}>
+            Pricing coming soon
+          </div>
+          <div style={{ fontSize: '12px', color: '#5A6272', marginBottom: '16px' }}>
+            We'll set a price once real usage tells us what the AI actually costs to run.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {PLUS_FEATURES.map((f) => (
+              <div key={f.title}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '13px', fontWeight: 600 }}>
+                  <Star size={13} fill="#5B7FA6" color="#5B7FA6" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <span>{f.title}</span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#8B93A0', lineHeight: 1.5, marginLeft: '21px', marginTop: '2px' }}>
+                  {f.desc}
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            disabled
+            style={{
+              ...primaryBtn, marginTop: '20px', width: '100%', justifyContent: 'center',
+              background: '#262E3B', color: '#5A6272', cursor: 'default',
+            }}
+          >
+            Coming soon
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
