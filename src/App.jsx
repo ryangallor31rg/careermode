@@ -213,7 +213,7 @@ function Header({ tab, setTab, storyCount }) {
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '4px', marginTop: '20px' }}>
+      <div style={{ display: 'flex', gap: '4px', marginTop: '20px', flexWrap: 'wrap' }}>
         <TabButton active={tab === 'bank'} onClick={() => setTab('bank')} icon={<BookOpen size={14} />}>
           Story Bank {storyCount > 0 && <span style={{ opacity: 0.6 }}>({storyCount})</span>}
         </TabButton>
@@ -856,6 +856,11 @@ function ResumeTemplates({ stories, goToBank }) {
       <div style={{ padding: '48px 28px', textAlign: 'center', color: '#8B93A0', fontSize: '13.5px' }}>
         Templates pull from your Story Bank, so add a few stories first — or import an existing
         resume — before building one here.
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button onClick={goToBank} style={{ ...secondaryBtn, marginTop: '18px' }}>
+            <BookOpen size={14} /> Go to Story Bank
+          </button>
+        </div>
       </div>
     );
   }
@@ -1251,6 +1256,11 @@ function CoverLetterTemplate({ stories, goToBank }) {
       <div style={{ padding: '48px 28px', textAlign: 'center', color: '#8B93A0', fontSize: '13.5px' }}>
         Cover letters pull from your Story Bank, so add a few stories first — or import an
         existing resume — before building one here.
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button onClick={goToBank} style={{ ...secondaryBtn, marginTop: '18px' }}>
+            <BookOpen size={14} /> Go to Story Bank
+          </button>
+        </div>
       </div>
     );
   }
