@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Plus, X, Sparkles, Tag as TagIcon, AlertTriangle, Check, Copy,
   Loader2, BookOpen, Trash2, ArrowRight, FileText, Pencil, Upload,
-  LayoutTemplate, Download, ChevronDown, MessageCircle, Lightbulb
+  LayoutTemplate, Download, ChevronDown, MessageCircle, Lightbulb, Mail
 } from 'lucide-react';
 
 const COMPETENCIES = [
@@ -175,6 +175,8 @@ export default function CareerMode() {
         <ImportResume stories={stories} onChange={persistStories} goToBank={() => setTab('bank')} />
       ) : tab === 'templates' ? (
         <ResumeTemplates stories={stories} goToBank={() => setTab('bank')} />
+      ) : tab === 'cover-letter' ? (
+        <CoverLetterTemplate stories={stories} goToBank={() => setTab('bank')} />
       ) : tab === 'interview' ? (
         <InterviewPrep stories={stories} />
       ) : (
@@ -220,6 +222,9 @@ function Header({ tab, setTab, storyCount }) {
         </TabButton>
         <TabButton active={tab === 'templates'} onClick={() => setTab('templates')} icon={<LayoutTemplate size={14} />}>
           Templates
+        </TabButton>
+        <TabButton active={tab === 'cover-letter'} onClick={() => setTab('cover-letter')} icon={<Mail size={14} />}>
+          Cover Letter
         </TabButton>
         <TabButton active={tab === 'builder'} onClick={() => setTab('builder')} icon={<FileText size={14} />}>
           Resume Builder
@@ -1137,6 +1142,229 @@ function ResumePreview({ profile, template, assignment, stories, skillsText }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ---------------- Cover Letter Template ---------------- */
+
+function CoverLetterTemplate({ stories, goToBank }) {
+  const [profile, setProfile] = useState(BLANK_PROFILE);
+  const [loaded, setLoaded] = useState(false);
+  const [company, setCompany] = useState('');
+  const [role, setRole] = useState('');
+  const [hiringManager, setHiringManager] = useState('');
+  const [opening, setOpening] = useState('');
+  const [selected, setSelected] = useState({});
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.storage.get('profile');
+        if (res && res.value) setProfile({ ...BLANK_PROFILE, ...JSON.parse(res.value) });
+      } catch (e) { /* no profile yet */ }
+      setLoaded(true);
+    })();
+  }, []);
+
+  async function updateProfile(field, value) {
+    const next = { ...profile, [field]: value };
+    setProfile(next);
+    try { await window.storage.set('profile', JSON.stringify(next)); } catch (e) { /* best effort */ }
+  }
+
+  function toggleSelected(id) {
+    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  const selectedStories = stories.filter((s) => selected[s.id]);
+
+  function letterText() {
+    const lines = [];
+    lines.push(profile.name || 'Your Name');
+    const contactLine = [profile.email, profile.phone, profile.location].filter(Boolean).join('  •  ');
+    if (contactLine) lines.push(contactLine);
+    lines.push('');
+    lines.push(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+    lines.push('');
+    lines.push(`Dear ${hiringManager.trim() || 'Hiring Manager'},`);
+    lines.push('');
+    const roleName = role.trim() || 'this position';
+    const atCompany = company.trim() ? ` at ${company.trim()}` : '';
+    lines.push(`I'm writing to apply for ${roleName}${atCompany}.${opening.trim() ? ` ${opening.trim()}` : ''}`);
+    lines.push('');
+    if (selectedStories.length === 0) {
+      lines.push('(select a few stories from your Story Bank to feature here)');
+    } else {
+      selectedStories.forEach((s) => {
+        lines.push(s.description);
+        lines.push('');
+      });
+    }
+    lines.push(`I'd welcome the opportunity to bring this experience to ${company.trim() || 'your team'}. Thank you for your time and consideration.`);
+    lines.push('');
+    lines.push('Sincerely,');
+    lines.push(profile.name || 'Your Name');
+    return lines.join('\n').trim();
+  }
+
+  async function copyText() {
+    try {
+      await navigator.clipboard.writeText(letterText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (e) { /* clipboard unavailable */ }
+  }
+
+  function downloadText() {
+    const blob = new Blob([letterText()], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(profile.name || 'cover_letter').replace(/\s+/g, '_')}_cover_letter.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadPDF() {
+    document.body.classList.add('printing-resume');
+    window.onafterprint = () => {
+      document.body.classList.remove('printing-resume');
+      window.onafterprint = null;
+    };
+    window.print();
+  }
+
+  if (!loaded) return null;
+
+  if (stories.length === 0) {
+    return (
+      <div style={{ padding: '48px 28px', textAlign: 'center', color: '#8B93A0', fontSize: '13.5px' }}>
+        Cover letters pull from your Story Bank, so add a few stories first — or import an
+        existing resume — before building one here.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '24px 28px 40px' }}>
+      <div style={{ fontSize: '13px', color: '#8B93A0', marginBottom: '18px', lineHeight: 1.5, maxWidth: '560px' }}>
+        Fill in the role, pick 2-3 stories from your Story Bank that fit it best, and this
+        builds a straightforward draft — no AI rewriting, just your own material in a standard
+        cover letter structure. Edit the wording before sending.
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 1fr) minmax(280px, 1.1fr)', gap: '22px', alignItems: 'start' }}>
+        <div>
+          <SectionLabel>Your info</SectionLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px', marginBottom: '18px' }}>
+            <input placeholder="Full name" value={profile.name} onChange={(e) => updateProfile('name', e.target.value)} style={inputStyle} />
+            <input placeholder="Email" value={profile.email} onChange={(e) => updateProfile('email', e.target.value)} style={inputStyle} />
+            <input placeholder="Phone" value={profile.phone} onChange={(e) => updateProfile('phone', e.target.value)} style={inputStyle} />
+            <input placeholder="Location" value={profile.location} onChange={(e) => updateProfile('location', e.target.value)} style={inputStyle} />
+          </div>
+
+          <SectionLabel>This application</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px', marginBottom: '10px' }}>
+            <input placeholder="Company name" value={company} onChange={(e) => setCompany(e.target.value)} style={inputStyle} />
+            <input placeholder="Role title" value={role} onChange={(e) => setRole(e.target.value)} style={inputStyle} />
+            <input placeholder="Hiring manager name (optional)" value={hiringManager} onChange={(e) => setHiringManager(e.target.value)} style={inputStyle} />
+            <textarea
+              placeholder="Optional: one sentence on why this role/company"
+              value={opening}
+              onChange={(e) => setOpening(e.target.value)}
+              rows={2}
+              style={{ ...inputStyle, resize: 'vertical' }}
+            />
+          </div>
+
+          <SectionLabel>Feature these stories ({selectedStories.length} selected)</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px', marginBottom: selectedStories.length > 3 ? '8px' : '18px' }}>
+            {stories.map((s) => (
+              <label key={s.id} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', fontSize: '12.5px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={!!selected[s.id]}
+                  onChange={() => toggleSelected(s.id)}
+                  style={{ marginTop: '2px', accentColor: '#4C8577' }}
+                />
+                <span>{s.title}</span>
+              </label>
+            ))}
+          </div>
+          {selectedStories.length > 3 && (
+            <div style={{ fontSize: '11.5px', color: '#C79A3D', marginBottom: '18px' }}>
+              Most cover letters read best with 2-3 stories — consider trimming.
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+            <button onClick={copyText} style={secondaryBtn}>
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy text'}
+            </button>
+            <button onClick={downloadPDF} style={primaryBtn}>
+              <Download size={14} /> Download PDF
+            </button>
+            <button onClick={downloadText} style={secondaryBtn}>
+              <Download size={14} /> Download .txt
+            </button>
+          </div>
+        </div>
+
+        <CoverLetterPreview
+          profile={profile} company={company} role={role}
+          hiringManager={hiringManager} opening={opening} selectedStories={selectedStories}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CoverLetterPreview({ profile, company, role, hiringManager, opening, selectedStories }) {
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const roleName = role.trim() || 'this position';
+  const atCompany = company.trim() ? ` at ${company.trim()}` : '';
+  return (
+    <div id="resume-print-target" style={{
+      background: '#F5F1E6', color: '#22201A', borderRadius: '4px',
+      padding: '28px 30px', boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+      position: 'sticky', top: '16px', minHeight: '400px',
+    }}>
+      <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: '20px', letterSpacing: '0.02em' }}>
+        {profile.name || 'Your Name'}
+      </div>
+      <div style={{ fontSize: '11.5px', color: '#5A5540', marginTop: '3px', fontFamily: "'IBM Plex Mono', monospace" }}>
+        {[profile.email, profile.phone, profile.location].filter(Boolean).join('   •   ') || 'email  •  phone  •  location'}
+      </div>
+
+      <div style={{ fontSize: '12px', color: '#5A5540', marginTop: '18px' }}>{today}</div>
+
+      <div style={{ fontSize: '13px', marginTop: '18px', lineHeight: 1.6 }}>
+        Dear {hiringManager.trim() || 'Hiring Manager'},
+      </div>
+
+      <div style={{ fontSize: '13px', marginTop: '14px', lineHeight: 1.6 }}>
+        I'm writing to apply for {roleName}{atCompany}.{opening.trim() ? ` ${opening.trim()}` : ''}
+      </div>
+
+      {selectedStories.length === 0 ? (
+        <div style={{ fontSize: '12px', color: '#8B8264', fontStyle: 'italic', marginTop: '14px' }}>
+          Select a few stories to feature them here.
+        </div>
+      ) : (
+        selectedStories.map((s) => (
+          <div key={s.id} style={{ fontSize: '13px', marginTop: '14px', lineHeight: 1.6 }}>{s.description}</div>
+        ))
+      )}
+
+      <div style={{ fontSize: '13px', marginTop: '14px', lineHeight: 1.6 }}>
+        I'd welcome the opportunity to bring this experience to {company.trim() || 'your team'}. Thank you for your time and consideration.
+      </div>
+
+      <div style={{ fontSize: '13px', marginTop: '18px', lineHeight: 1.6 }}>
+        Sincerely,<br />{profile.name || 'Your Name'}
+      </div>
     </div>
   );
 }
