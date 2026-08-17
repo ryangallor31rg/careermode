@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Plus, X, Sparkles, Tag as TagIcon, AlertTriangle, Check, Copy,
   Loader2, BookOpen, Trash2, ArrowRight, FileText, Pencil, Upload,
-  LayoutTemplate, Download, ChevronDown, MessageCircle, Lightbulb, Mail
+  LayoutTemplate, Download, ChevronDown, MessageCircle, Lightbulb, Mail, Star
 } from 'lucide-react';
 
 const COMPETENCIES = [
@@ -217,7 +217,7 @@ function Header({ tab, setTab, storyCount }) {
         <TabButton active={tab === 'bank'} onClick={() => setTab('bank')} icon={<BookOpen size={14} />}>
           Story Bank {storyCount > 0 && <span style={{ opacity: 0.6 }}>({storyCount})</span>}
         </TabButton>
-        <TabButton active={tab === 'import'} onClick={() => setTab('import')} icon={<Upload size={14} />}>
+        <TabButton active={tab === 'import'} onClick={() => setTab('import')} icon={<Upload size={14} />} aiPowered>
           Import Resume
         </TabButton>
         <TabButton active={tab === 'templates'} onClick={() => setTab('templates')} icon={<LayoutTemplate size={14} />}>
@@ -226,21 +226,28 @@ function Header({ tab, setTab, storyCount }) {
         <TabButton active={tab === 'cover-letter'} onClick={() => setTab('cover-letter')} icon={<Mail size={14} />}>
           Cover Letter
         </TabButton>
-        <TabButton active={tab === 'builder'} onClick={() => setTab('builder')} icon={<FileText size={14} />}>
+        <TabButton active={tab === 'builder'} onClick={() => setTab('builder')} icon={<FileText size={14} />} aiPowered>
           Resume Builder
         </TabButton>
-        <TabButton active={tab === 'interview'} onClick={() => setTab('interview')} icon={<MessageCircle size={14} />}>
+        <TabButton active={tab === 'interview'} onClick={() => setTab('interview')} icon={<MessageCircle size={14} />} aiPowered>
           Interview Prep
         </TabButton>
+      </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
+        color: '#5A6272', marginTop: '10px', paddingBottom: '10px',
+      }}>
+        <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> needs an AI API key to work
       </div>
     </div>
   );
 }
 
-function TabButton({ active, onClick, children, icon }) {
+function TabButton({ active, onClick, children, icon, aiPowered }) {
   return (
     <button
       onClick={onClick}
+      title={aiPowered ? 'Needs an AI API key to work' : undefined}
       style={{
         display: 'flex', alignItems: 'center', gap: '6px',
         padding: '9px 16px',
@@ -255,6 +262,7 @@ function TabButton({ active, onClick, children, icon }) {
       }}
     >
       {icon}{children}
+      {aiPowered && <Star size={10} fill="#5B7FA6" color="#5B7FA6" style={{ marginLeft: '1px' }} />}
     </button>
   );
 }
