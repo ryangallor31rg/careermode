@@ -237,7 +237,7 @@ function Header({ tab, setTab, storyCount }) {
         display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
         color: '#5A6272', marginTop: '10px', paddingBottom: '10px',
       }}>
-        <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> needs an AI API key to work
+        <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> CareerMode Plus
       </div>
     </div>
   );
@@ -247,7 +247,7 @@ function TabButton({ active, onClick, children, icon, aiPowered }) {
   return (
     <button
       onClick={onClick}
-      title={aiPowered ? 'Needs an AI API key to work' : undefined}
+      title={aiPowered ? 'CareerMode Plus' : undefined}
       style={{
         display: 'flex', alignItems: 'center', gap: '6px',
         padding: '9px 16px',
