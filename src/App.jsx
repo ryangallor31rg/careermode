@@ -193,6 +193,23 @@ export default function CareerMode() {
   );
 }
 
+function LogoMark({ size = 28 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: size * 0.22,
+      background: '#12151C', border: '1px solid #262E3B',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>
+      <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 64 64">
+        <g stroke="#C79A3D" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none">
+          <path d="M18 46 L44 20" />
+          <path d="M30 20 L44 20 L44 34" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 function Header({ tab, setTab, storyCount }) {
   return (
     <div style={{
@@ -201,14 +218,17 @@ function Header({ tab, setTab, storyCount }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div style={{
-            fontFamily: "'Fraunces', serif",
-            fontStyle: 'italic',
-            fontWeight: 500,
-            fontSize: '26px',
-            letterSpacing: '-0.01em',
-          }}>
-            CareerMode
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <LogoMark size={26} />
+            <div style={{
+              fontFamily: "'Fraunces', serif",
+              fontStyle: 'italic',
+              fontWeight: 500,
+              fontSize: '26px',
+              letterSpacing: '-0.01em',
+            }}>
+              CareerMode
+            </div>
           </div>
           <div style={{ fontSize: '12.5px', color: '#8B93A0', marginTop: '2px', fontFamily: "'IBM Plex Mono', monospace" }}>
             everything you need to find and land the career you want
