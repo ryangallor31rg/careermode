@@ -226,6 +226,7 @@ function Header({ tab, setTab, storyCount }) {
               fontWeight: 500,
               fontSize: '26px',
               letterSpacing: '-0.01em',
+              color: '#C79A3D',
             }}>
               CareerMode
             </div>
