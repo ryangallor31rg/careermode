@@ -238,15 +238,79 @@ function Header({ tab, setTab, storyCount }) {
           Plus
         </TabButton>
       </div>
-      <div
-        onClick={() => setTab('plus')}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
-          color: '#5A6272', marginTop: '10px', paddingBottom: '10px', cursor: 'pointer', width: 'fit-content',
-        }}
-      >
-        <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> CareerMode Plus
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginTop: '10px', paddingBottom: '10px', flexWrap: 'wrap', gap: '8px',
+      }}>
+        <div
+          onClick={() => setTab('plus')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px',
+            color: '#5A6272', cursor: 'pointer', width: 'fit-content',
+          }}
+        >
+          <Star size={9} fill="#5B7FA6" color="#5B7FA6" /> CareerMode Plus
+        </div>
+        <DataBackup />
       </div>
+    </div>
+  );
+}
+
+function DataBackup() {
+  const fileRef = useRef(null);
+  const [status, setStatus] = useState(null);
+
+  async function exportBackup() {
+    const keys = ['stories', 'profile', 'applications'];
+    const data = {};
+    for (const key of keys) {
+      try {
+        const res = await window.storage.get(key);
+        if (res && res.value) data[key] = JSON.parse(res.value);
+      } catch (e) { /* key not set, skip */ }
+    }
+    const payload = { version: 1, exportedAt: new Date().toISOString(), data };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `careermode_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleImportFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setStatus(null);
+    const proceed = window.confirm('Importing a backup replaces your current Story Bank and profile data on this device. Continue?');
+    if (!proceed) { e.target.value = ''; return; }
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const data = parsed.data || parsed;
+      for (const [key, value] of Object.entries(data)) {
+        await window.storage.set(key, JSON.stringify(value));
+      }
+      window.location.reload();
+    } catch (err) {
+      setStatus('That file could not be read — make sure it is a CareerMode backup.');
+      e.target.value = '';
+    }
+  }
+
+  const linkStyle = {
+    background: 'none', border: 'none', color: '#5A6272', fontSize: '11px',
+    cursor: 'pointer', padding: 0, textDecoration: 'underline', textUnderlineOffset: '2px',
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {status && <span style={{ fontSize: '11px', color: '#B4694A' }}>{status}</span>}
+      <button onClick={exportBackup} style={linkStyle}>Export backup</button>
+      <button onClick={() => fileRef.current?.click()} style={linkStyle}>Import backup</button>
+      <input ref={fileRef} type="file" accept="application/json" style={{ display: 'none' }} onChange={handleImportFile} />
     </div>
   );
 }
